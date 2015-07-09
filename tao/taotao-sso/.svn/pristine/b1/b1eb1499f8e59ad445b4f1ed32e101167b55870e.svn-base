@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.taotao.sso.mapper.UserMapper">
+
+	<select id="queryByWhere" resultType="User">
+		SELECT * FROM tb_user
+		<where>
+			<choose>
+				<when test="type == 1">username = #{param}</when>
+				<when test="type == 2">phone = #{param}</when>
+				<when test="type == 3">email = #{param}</when>
+				<!-- 非法Type，报错出来 -->
+				<otherwise>ERROR</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+	<insert id="saveUser" parameterType="User" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		INSERT INTO tb_user (
+			id,
+			username,
+			password,
+			phone,
+			email,
+			created,
+			updated
+		)
+		VALUES
+			(
+				NULL,
+				#{username},
+				#{password},
+				#{phone},
+				#{email},
+				NOW(),
+				NOW()
+			);
+	</insert>
+
+</mapper>

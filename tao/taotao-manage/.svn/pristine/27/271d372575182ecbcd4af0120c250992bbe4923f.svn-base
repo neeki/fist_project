@@ -1,0 +1,22 @@
+package com.taotao.manage.service;
+
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageInfo;
+import com.taotao.common.vo.EasyUIResult;
+import com.taotao.manage.pojo.Item;
+
+/**
+ * 
+ * 处理商品相关的业务逻辑
+ * 
+ */
+@Service
+public class ItemService extends BaseService<Item> {
+
+    public EasyUIResult queryItemList(Integer page, Integer rows) {
+        PageInfo<Item> pageInfo = super.queryPageList(page, rows);
+        return new EasyUIResult(pageInfo.getTotal(), pageInfo.getList());
+    }
+
+}

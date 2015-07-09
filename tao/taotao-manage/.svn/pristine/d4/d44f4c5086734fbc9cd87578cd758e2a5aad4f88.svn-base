@@ -1,0 +1,63 @@
+package com.taotao.manage.service;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageInfo;
+import com.taotao.common.vo.EasyUIResult;
+import com.taotao.manage.pojo.Item;
+import com.taotao.manage.pojo.ItemDesc;
+import com.taotao.manage.pojo.ItemParamItem;
+
+/**
+ * 
+ * 处理商品相关的业务逻辑
+ * 
+ */
+@Service
+public class ItemService extends BaseService<Item> {
+
+    @Autowired
+    private ItemDescService itemDescService;
+    
+    @Autowired
+    private ItemParamItemService itemParamItemService;
+
+    public EasyUIResult queryItemList(Integer page, Integer rows) {
+        PageInfo<Item> pageInfo = super.queryPageList(page, rows);
+        return new EasyUIResult(pageInfo.getTotal(), pageInfo.getList());
+    }
+
+    public Long saveItem(Item item, String desc,String itemParams) {
+        // 保存商品数据到数据库
+        // 数据初始化
+        item.setCreated(new Date());
+        item.setUpdated(item.getCreated());
+        item.setStatus(1);
+        super.save(item);
+        
+        Item item2 = super.queryById(item.getId());
+        System.out.println(item2);
+
+        // 保存商品描述数据到数据库
+        ItemDesc itemDesc = new ItemDesc();
+        itemDesc.setItemId(item.getId());
+        itemDesc.setItemDesc(desc);
+        itemDesc.setCreated(new Date());
+        itemDesc.setUpdated(itemDesc.getCreated());
+        this.itemDescService.save(itemDesc);
+        
+        // 保存商品规格参数数据
+        ItemParamItem itemParamItem = new ItemParamItem();
+        itemParamItem.setItemId(item.getId());
+        itemParamItem.setParamData(itemParams);
+        itemParamItem.setCreated(new Date());
+        itemParamItem.setUpdated(itemParamItem.getCreated());
+        this.itemParamItemService.save(itemParamItem);
+        
+        return item.getId();
+    }
+
+}

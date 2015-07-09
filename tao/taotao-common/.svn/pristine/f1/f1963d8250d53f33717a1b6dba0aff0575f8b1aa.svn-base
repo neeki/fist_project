@@ -1,0 +1,110 @@
+package com.taotao.common.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
+@Service
+public class RedisService {
+
+    @Autowired(required = false)
+    private JedisPool jedisPool;
+
+    private <K> K execute(Function<Jedis, K> fun) {
+        Jedis jedis = null;
+        try {
+            // 从连接池中获取连接
+            jedis = jedisPool.getResource();
+            return fun.callback(jedis);
+        } finally {
+            // 将连接还回到连接池中
+            jedisPool.returnResource(jedis);
+        }
+    }
+
+    /**
+     * 设置一个值
+     * 
+     * @param key
+     * @param value
+     * @return
+     */
+    public String set(final String key, final String value) {
+        return this.execute(new Function<Jedis, String>() {
+            @Override
+            public String callback(Jedis jedis) {
+                return jedis.set(key, value);
+            }
+        });
+    }
+
+    /**
+     * 设置一个值，并且指定生存时间
+     * 
+     * @param key
+     * @param value
+     * @param seconds
+     * @return
+     */
+    public String set(final String key, final String value, final Integer seconds) {
+        return this.execute(new Function<Jedis, String>() {
+            @Override
+            public String callback(Jedis jedis) {
+                String str = jedis.set(key, value);
+                jedis.expire(key, seconds);
+                return str;
+            }
+        });
+    }
+    
+    /**
+     * 为key设置生存时间
+     * 
+     * @param key
+     * @param seconds
+     * @return
+     */
+    public Long expire(final String key, final Integer seconds){
+        return this.execute(new Function<Jedis, Long>() {
+            @Override
+            public Long callback(Jedis jedis) {
+                return jedis.expire(key, seconds);
+            }
+            
+        });
+    }
+
+    /**
+     * 获取数据
+     * 
+     * @param key
+     * @return
+     */
+    public String get(final String key) {
+        return this.execute(new Function<Jedis, String>() {
+            @Override
+            public String callback(Jedis e) {
+                return e.get(key);
+            }
+
+        });
+    }
+
+    /**
+     * 删除key
+     * 
+     * @param key
+     * @return
+     */
+    public Long del(final String key) {
+        return this.execute(new Function<Jedis, Long>() {
+            @Override
+            public Long callback(Jedis e) {
+                return e.del(key);
+            }
+        });
+    }
+
+}

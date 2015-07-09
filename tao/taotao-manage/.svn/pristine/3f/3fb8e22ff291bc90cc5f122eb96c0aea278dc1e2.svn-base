@@ -1,0 +1,19 @@
+package com.taotao.manage.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.taotao.manage.pojo.ItemCat;
+
+public interface ItemCatMapper {
+
+    /**
+     * 根据父节点ID查询商品类目
+     * 
+     * @param parentId
+     * @return
+     */
+    List<ItemCat> queryList(@Param("parentId") Long parentId);
+
+}
